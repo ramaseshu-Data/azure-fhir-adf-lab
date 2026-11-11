@@ -1,0 +1,15 @@
+{
+	"name": "capstone1235",
+	"properties": {
+		"trustModeClaimForMi": {
+			"value": "Disabled",
+			"editable": true
+		}
+	},
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "4c090fe1-a338-46ff-8aa9-9055c36ed614",
+		"tenantId": "59f81ed8-aadf-4c98-84a3-d6b95683d904"
+	}
+}

@@ -1,0 +1,75 @@
+{
+	"name": "dataflow1",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Json1",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "DelimitedText1",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "flatten1"
+				},
+				{
+					"name": "filter1"
+				},
+				{
+					"name": "derivedColumn1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          resourceType as string,",
+				"          id as string,",
+				"          meta as (lastUpdated as string),",
+				"          type as string,",
+				"          total as integer,",
+				"          link as (relation as string, url as string)[],",
+				"          entry as (fullUrl as string, resource as (resourceType as string, id as string, meta as (versionId as string, lastUpdated as string, tag as (system as string, code as string, display as string)[]), status as string, class as (system as string, code as string, display as string), type as (coding as (system as string, code as string, display as string)[])[], subject as (reference as string, display as string), participant as (type as (coding as (system as string, code as string, display as string)[])[], individual as (reference as string, display as string))[], period as (start as string, end as string), location as (location as (reference as string), status as string)[], serviceProvider as (reference as string)), search as (mode as string))[]",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     documentForm: 'documentPerLine') ~> source1",
+				"source1 foldDown(unroll(entry),",
+				"     mapColumn(",
+				"          resourceType,",
+				"          id,",
+				"          meta,",
+				"          type,",
+				"          total,",
+				"          link,",
+				"          entry",
+				"     ),",
+				"     skipDuplicateMapInputs: false,",
+				"     skipDuplicateMapOutputs: false) ~> flatten1",
+				"flatten1 filter(entry.resource.status == 'finished') ~> filter1",
+				"filter1 derive(id = entry.resource.id,",
+				"          entry = entry.resource.status) ~> derivedColumn1",
+				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     mapColumn(",
+				"          id,",
+				"          entry",
+				"     )) ~> sink1"
+			]
+		}
+	}
+}
