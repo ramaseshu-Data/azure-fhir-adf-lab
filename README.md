@@ -1,121 +1,48 @@
-# Online Food Delivery System Ontology
+# FHIR Encounter API to Power BI with Azure Data Factory
 
-This project presents an **Online Food Delivery System Ontology** developed using **Protégé and OWL 2**. It models the core components of a food delivery platform, including customers, restaurants, delivery agents, orders, menu items, payments, and addresses.
+A hands-on Azure data engineering lab that retrieves synthetic healthcare encounters from a public FHIR R4 API, transforms them in Azure Data Factory, and loads the results into Power BI.
 
----
+## Architecture
 
-## 📌 Project Overview
+FHIR Encounter API → ADF Copy Data → Raw JSON in Blob Storage → ADF Mapping Data Flow → Processed CSV in Blob Storage → Power BI
 
-The ontology represents a real-world food delivery system by defining:
+## How the pipeline works
 
-- Structured **class hierarchy**
-- Relationships using **object properties**
-- Attributes using **data properties**
-- Sample data through **individuals**
-- Logical rules like **disjointness** and **cardinality restrictions**
-- Validation using **HermiT Reasoner**
-- Data retrieval using **SPARQL queries**
+| Stage | Implementation |
+|---|---|
+| Ingestion | `pipeline1` sends an anonymous HTTP `GET` request to a public FHIR Encounter endpoint and saves the response as a JSON file in Azure Blob Storage. |
+| Transformation | `pipeline2` runs `dataflow1`. It reads the FHIR Bundle as a single JSON document, flattens the `entry` array into rows, and keeps encounters with `resource.status == 'finished'`. |
+| Output | The Data Flow extracts the encounter ID and status and writes them to a CSV in Blob Storage. |
+| Reporting | Power BI Desktop connects to Blob Storage and loads the processed CSV through Power Query. |
 
----
+## Validation and recovery
 
-## 🧱 Class Hierarchy
+I used a separate Python script to count the finished encounters in the saved FHIR Bundle. The count matched across all three stages.
 
-- **Person**
-  - Customer
-  - DeliveryAgent
-- **Restaurant**
-- **Order**
-- **MenuItem**
-- **Payment**
-- **Address**
+| Stage | Count |
+|---|---:|
+| Finished encounters in the saved JSON | 20 |
+| Data rows in the output CSV | 20 |
+| Rows loaded into Power BI | 20 |
 
----
+I reran `pipeline2` using the saved raw JSON. The rerun produced a second CSV with 20 rows without another API request. For a snapshot report, the report should read one intended output file so repeated runs do not inflate the total.
 
-## 🔗 Object Properties
+## Troubleshooting
 
-- `placesOrder` (Customer → Order)  
-- `hasAddress` (Customer → Address)  
-- `containsItem` (Order → MenuItem)  
-- `hasPayment` (Order → Payment)  
-- `preparedBy` (Order → Restaurant)  
-- `deliversOrder` (DeliveryAgent → Order)  
+- Resolved a `FAILFAST` JSON parsing error by setting the Data Flow source to **Single document** to match the saved Bundle.
+- Resolved a CSV sink validation error by excluding nested fields and mapping only the encounter ID and status.
 
----
+## Repository structure
 
-## 🧾 Data Properties
+| Folder | Contents |
+|---|---|
+| `pipeline/` | ADF ingestion and transformation pipeline definitions |
+| `dataflow/` | Mapping Data Flow definition |
+| `dataset/` | Source and sink dataset definitions |
+| `linkedService/` | ADF connection definitions |
 
-- `personName` (string)  
-- `restaurantName` (string)  
-- `itemName` (string)  
-- `orderDate` (dateTime)  
-- `paymentAmount` (decimal)  
-- `addressLine` (string)  
+## Lab scope
 
----
+The lab processes one saved API response page containing 20 synthetic encounters. A full extraction would follow the FHIR Bundle’s `next` links and reconcile records across pages.
 
-## 👥 Sample Individuals
-
-- Customers: Asha Reddy, Rohan Kumar  
-- Delivery Agents: Vikram Singh, Neha Sharma  
-- Restaurants: Spice Hub, Pizza Point  
-- Orders: Order_001, Order_002  
-- Items: Chicken Biryani, Veg Pizza  
-- Payments: 450.00, 300.00  
-- Addresses: Hyderabad locations  
-
----
-
-## ⚙️ Ontology Constraints
-
-### Disjointness
-Ensures separation between unrelated classes (e.g., Customer ≠ DeliveryAgent)
-
-### Cardinality Restriction
-- Each **Order has exactly one Payment**
-
----
-
-## 🧠 Reasoning
-
-Validated using **HermiT Reasoner**:
-- No inconsistencies found  
-- All constraints satisfied  
-- Ontology is logically correct  
-
----
-
-## 🔍 SPARQL Queries
-
-Implemented queries to:
-
-1. List all customers  
-2. Retrieve customers and their orders  
-3. Get orders with items  
-4. Find delivery agents and deliveries  
-5. Validate payment constraint  
-6. Retrieve customers with addresses  
-
----
-
-## 🛠️ Tools Used
-
-- Protégé  
-- OWL 2  
-- RDF/XML  
-- HermiT Reasoner  
-- SPARQL  
-
----
-
-## 📁 File
-
-- `online_food_delivery.owl` – Ontology file
-- - `online_food_delivery_vijay.docx` – Word file (Complete Descripption)  
-
----
-
----
-
-## 📖 Conclusion
-
-This project demonstrates how semantic web technologies can model a real-world system using ontology design, logical constraints, reasoning, and query-based validation.
+The repository stores ADF configuration. Blob files and the Power BI `.pbix` report are managed separately. Configure Azure connections in your own environment and keep credentials out of source control.
