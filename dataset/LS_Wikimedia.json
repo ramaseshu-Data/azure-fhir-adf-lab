@@ -1,5 +1,5 @@
 {
-	"name": "RestResource2",
+	"name": "LS_Wikimedia",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "Live_data",
