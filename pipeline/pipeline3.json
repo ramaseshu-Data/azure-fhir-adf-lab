@@ -49,7 +49,7 @@
 				]
 			},
 			{
-				"name": "readwiki",
+				"name": "ReadWikiFile",
 				"type": "Lookup",
 				"dependsOn": [
 					{
@@ -90,7 +90,7 @@
 				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "readwiki",
+						"activity": "ReadWikiFile",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -118,7 +118,7 @@
 							"typeProperties": {
 								"method": "POST",
 								"headers": {
-									"Type": "Application"
+									"Content-Type": "application/json"
 								},
 								"url": "https://eh-ramaseshu-wiki.servicebus.windows.net/wiki-events/messages",
 								"body": "@string(item())",
