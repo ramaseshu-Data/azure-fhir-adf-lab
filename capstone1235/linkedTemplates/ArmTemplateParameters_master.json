@@ -1,0 +1,24 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "capstone1235"
+		},
+		"LS_Blob_connectionString": {
+			"value": ""
+		},
+		"Live_data_properties_typeProperties_url": {
+			"value": "https://en.wikipedia.org/w/api.php"
+		},
+		"RestService1_properties_typeProperties_url": {
+			"value": "https://api.sondahub.com/fhir"
+		},
+		"containerUri": {
+			"value": ""
+		},
+		"containerSasToken": {
+			"value": ""
+		}
+	}
+}
