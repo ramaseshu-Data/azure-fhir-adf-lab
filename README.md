@@ -46,3 +46,8 @@ I reran `pipeline2` using the saved raw JSON. The rerun produced a second CSV wi
 The lab processes one saved API response page containing 20 synthetic encounters. A full extraction would follow the FHIR Bundle’s `next` links and reconcile records across pages.
 
 The repository stores ADF configuration. Blob files and the Power BI `.pbix` report are managed separately. Configure Azure connections in your own environment and keep credentials out of source control.
+## Wikipedia Edits Monitor
+
+Azure Data Factory polls the Wikipedia RecentChanges API and sends each edit to Azure Event Hubs. Databricks saves the raw events in a bronze Delta table and creates a silver view with one row per edit ID. Power BI uses DirectQuery to show the page title, edit ID, and edit time.
+
+[ADF pipeline](pipeline/pipeline3.json) · [Bronze SQL](databricks/bronze.sql) · [Silver SQL](databricks/silver.sql)
